@@ -1,3 +1,7 @@
+#output generated to same directory, in folder called outputs
+#scrollboxes set to dimensions of input file by default
+#when file is opened, output radio button delimiter matches input by default
+
 import tkinter as tk
 from tkinter import *
 from tkinter import filedialog
@@ -8,7 +12,7 @@ import os
 #initiate main window
 window = tk.Tk()
 window.title("CSV Manipulation")
-window.geometry("400x360")
+window.geometry("300x360")
 
 #initiate output variables
 delimiterInput = tk.StringVar()
@@ -31,24 +35,26 @@ pipelineInput = tk.Radiobutton(delimiterFrm, text='|', variable=delimiterInput)
 pipelineInput.config(indicatoron=0, bd=4, width=12, value="|")
 pipelineInput.grid(row=1, column=1)
 
-#function for generate output button, simply ends mainloop and generates file
+delimiterOutput.set(delimiterInput)
+
 def close():
+   create_dir(filepath + '/outputs')
    window.destroy()
 
 #initiate upload file button and function
 def UploadAction(event=None):
     filetypes = (('csv files', '*.csv'),('All files', '*.*'))
     global filename
+    global filepath
     global table
     table = []
     filename = filedialog.askopenfilename(filetypes=filetypes)
+    filepath = os.path.split(filename)[0]
     filenameDisplay = tk.Label(delimiterFrm, text = 'Selected: ' + os.path.split(filename)[1])
     filenameDisplay.place(x=100, y=75, anchor="center")
-    #if input is comma delimited simply conver to array for manipulation
     if delimiterInput.get() == ",":
         file = open(filename)
         csvfile = csv.reader(file)
-    #if input is pipeline convert to comma then to array
     else:
         with open(filename) as fin:
             with open('output.csv', 'w', newline='') as fout:
@@ -62,18 +68,26 @@ def UploadAction(event=None):
         table.append(row)
     global rowsBox
     global columnsBox
-     #initiates spinboxes for dimensions, only appears once user inputs file
+    rows.set(len(table))
+    columns.set(len(table[0]))
     rowsBox = tk.Spinbox(dimensionFrm, from_=0, to=len(table), textvariable=rows, wrap=True)
     columnsBox = tk.Spinbox(dimensionFrm, from_=0, to=len(table[0]), textvariable=columns, wrap=True)
     rowsBox.grid(row=0, column=1)
     columnsBox.grid(row=1, column=1)
+    delimiterOutput.set(delimiterInput.get())
+
+def create_dir(directory):
+  if not os.path.exists(directory):
+    os.makedirs(directory)
+    print("Created Directory : ", directory)
+
 uploadFile = tk.Button(delimiterFrm, text="Upload File", command=UploadAction)
 uploadFile.place(x=100, y=50, anchor="center")
 
 #--------------------------------------------------#
 
 #initiate and configure dimension choosing frame
-dimensionFrm = LabelFrame(window, width=200, height=100, text='Choose Dimensions')
+dimensionFrm = LabelFrame(window, width=200, height=70, text='Choose Dimensions')
 dimensionFrm.pack(pady=5)
 dimensionFrm.grid_propagate(0)
 dimensionFrm.update()
@@ -109,6 +123,7 @@ outputFile.place(x=100, y=50, anchor="center")
 #program loop
 window.mainloop()
 
+#debug
 rowLimit = rows.get()
 columnLimit = columns.get()
 chosenDelimiter = delimiterOutput.get()
@@ -117,7 +132,6 @@ chosenDelimiter = delimiterOutput.get()
 newTable = []
 newRow = []
 
-#removes unwanted rows and columns
 for row in table:
     for element in range(0, columnLimit):
         newRow.append(row[element])
@@ -128,8 +142,7 @@ for row in range(len(newTable)-1, rowLimit, -1):
 
 numpyArray = np.array(newTable)
 
-#saves with chosen delimiter to output.csv
 if chosenDelimiter == ",":
-    np.savetxt('output.csv', numpyArray, delimiter=',', fmt='%s')
+    np.savetxt(filepath + '/outputs/output.csv', numpyArray, delimiter=',', fmt='%s')
 else:
-    np.savetxt('output.csv', numpyArray, delimiter='|', fmt='%s')
+    np.savetxt(filepath + '/outputs/output.csv', numpyArray, delimiter='|', fmt='%s')
