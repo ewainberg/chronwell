@@ -74,6 +74,7 @@ def generateDelimiterInputFrame(window, width, height, xpos, ypos, text, uploadB
     if uploadButton:
         generateUploadButton(0.5, 0.6, upload, delimiterInputFrame)
 
+#function that runs on change of delimiter input radio buttons. when they are clicked out of the default none selected, it turns to normal state from disabled
 def onDelimiterInputChange(*args):
     global flag
     if delimiterInput.get() == 'none':
@@ -84,6 +85,7 @@ def onDelimiterInputChange(*args):
             delimiterOutput.set(delimiterInput.get())
             flag = True
 
+#function to generate dimension frame from given window, width, height, x position relative to window, y position the same as x, and the title of it
 def generateDimensionFrm(window, width, height, xpos, ypos, text):
     global rowsBox, columnsBox
     dimensionFrm = LabelFrame(window, width=width, height=height, text=text)
@@ -97,6 +99,7 @@ def generateDimensionFrm(window, width, height, xpos, ypos, text):
     rowsBox.place(relx = 0.29, rely = 0.06)
     columnsBox.place(relx = 0.29, rely = 0.55)
 
+#function to generate delimiter output frame from given window, width, height, x position relative to window, y position the same as x, and the title of it
 def generateDelimiterOutputFrame(window, width, height, xpos, ypos, text):
     global generateOutput
     delimiterOutputFrame = LabelFrame(window, width=width, height=height, text=text)
@@ -216,13 +219,14 @@ def main(table):
 
     #calls savesheets function to save sheets into file, converts array into numpy array then into pandas dataframe to be exported into xls
     dataFrame = pd.DataFrame(table, columns = headers)
-    create_dir(filepath + '/Outputs/XLS Outputs/')
-    create_dir(filepath + '/Outputs/CSV Outputs/')
-    if practiceType in ["A1", "B1", "C1"]:
+    create_dir(filepath + '/Outputs/XLS Outputs/') #directory for project2
+    create_dir(filepath + '/Outputs/CSV Outputs/') #directory for project1
+    if practiceType in ["A1", "B1", "C1"]: #only saves output as XLS if it is one of the project 2 excercises
         saveSheets(filepath + '/Outputs/XLS Outputs/' + practiceType + '_Output.xls', [dataFrame, summaryDataFrame], ['Data', 'Summary'])
-
+    
+    #---------------------------------project 1 
     newRow = []
-    newCsvTable = []
+    newCsvTable = [] #variable for csv output (first project output)
     newHeaders = []
     for row in table:
         for element in range(0, columns.get()):
@@ -232,22 +236,23 @@ def main(table):
 
     for element in range(0, columns.get()):
         newHeaders.append(headers[element])
-        
-    if rows.get() != 0: 
+    
+    if rows.get() != 0: #if the row setting is not zero, it will only pop out elements until given row
         for row in range(len(newCsvTable)-1, rows.get()-1, -1):
             newCsvTable.pop(row)
         csvTable = np.insert(newCsvTable, 0, newHeaders, 0)
     else:
-        newCsvTable = []
+        newCsvTable = [] #if the row setting is zero, it will get rid of all columns and append the headers
         newCsvTable.append(newHeaders)
         csvTable = newCsvTable
-        
-
+    
+    #save sheets according to delimiters, this is the project 1 output
     if delimiterOutput.get() == ",":
         np.savetxt(filepath + '/Outputs/CSV Outputs/Output.csv', csvTable, delimiter=',', fmt='%s')
     else:
         np.savetxt(filepath + '/Outputs/CSV Outputs/Output.csv', csvTable, delimiter='|', fmt='%s')
-
+    
+    #set the file display name to none, to let the user know they should choose another file
     filenameDisplay.configure(text = "Selected: None")
     
 
@@ -265,11 +270,13 @@ if __name__ == "__main__":
     delimiterOutput = tk.StringVar(value = 'none')
     rows = tk.IntVar()
     columns = tk.IntVar()
+    #tace_add keeps track of the changes of the delimiter input radio buttons
     delimiterInput.trace_add('write', onDelimiterInputChange)
+    #flag to set the output delimiter the same as the delimiter input only one time at the begining, so they should not always be the same
     flag = False
 
     #sets up graphical interface
-    generateDelimiterInputFrame(window, 100, 85, 0.5, 0.2, "Input Delimiter", True)
+    generateDelimiterInputFrame(window, 100, 85, 0.5, 0.2, "Input Delimiter", True) #true parameter lets the function know to create an "upload button" under the radiobuttons
     generateDimensionFrm(window, 200, 70, .5, .46, "Output Dimensions")
     generateDelimiterOutputFrame(window, 110, 85, .5, .75, "Output Delimiter")
         
