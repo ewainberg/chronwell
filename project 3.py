@@ -262,7 +262,7 @@ if __name__ == "__main__":
     window = tk.Tk()
     window.title("CSV to XLS / Manipulation")
     window.geometry("300x290")
-    window.resizable(False, False)
+    window.resizable(False, False) #makes window none resizable so it always looks pretty
 
     #tk variables for radiobuttons and dimension scrollers
     global rows, columns, delimiterOutput, delimiterInput, filenameDisplay
@@ -270,7 +270,8 @@ if __name__ == "__main__":
     delimiterOutput = tk.StringVar(value = 'none')
     rows = tk.IntVar()
     columns = tk.IntVar()
-    #tace_add keeps track of the changes of the delimiter input radio buttons
+    
+    #trace_add keeps track of the changes of the delimiter input radio buttons
     delimiterInput.trace_add('write', onDelimiterInputChange)
     #flag to set the output delimiter the same as the delimiter input only one time at the begining, so they should not always be the same
     flag = False
